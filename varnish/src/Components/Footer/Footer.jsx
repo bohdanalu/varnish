@@ -1,0 +1,20 @@
+import React from "react";
+import PageContainer from "../PageContainer/PageContainer";
+import styles from "./Footer.module.css";
+import Nav from "./Nav/Nav";
+import Social from "./Social/Social";
+
+function Footer() {
+  return (
+    <div className={styles.footer}>
+      <PageContainer>
+        <div className={styles.wrapper}>
+          <Nav />
+          <Social />
+        </div>
+      </PageContainer>
+    </div>
+  );
+}
+
+export default Footer;
