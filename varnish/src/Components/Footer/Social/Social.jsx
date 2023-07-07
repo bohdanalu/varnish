@@ -1,14 +1,14 @@
 import React from "react";
 import styles from "./Social.module.css";
-import { social } from "../../../constants";
+import { socialIcons } from "../../../constants";
 
 function Social() {
   return (
     <ul className={styles.socialLinks}>
-      {social.map((socialItem) => (
-        <li className={styles.socialItem} key={socialItem.id}>
-          <a href="#">
-            <img src={socialItem.src} alt={socialItem.title} />
+      {socialIcons.map((social) => (
+        <li className={styles.socialItem} key={social.id}>
+          <a href="#" style={{ color: "var(--txt-color)" }}>
+            {social.icon}
           </a>
         </li>
       ))}

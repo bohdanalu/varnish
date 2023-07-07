@@ -1,127 +1,182 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./FormConverter.module.css";
-import { currencies, percents } from "../../constants";
-import DropDown from "./DropDown/DropDown";
+import { percents, inputsCurrency, inputsValidation } from "../../constants";
+import SelectCurrency from "./SelectCurrency/SelectCurrency";
+import Tooltip from "./Tooltip/Tooltip";
+import Percents from "./Percents/Percents";
 
 function FormConverter() {
-  // const [selectedValue, setSelectedValue] = useState({
-  //   img: `${currencies[0].img}`,
-  //   code: `${currencies[0].code}`,
-  // });
-  const [isOpen, setIsOpen] = useState({
-    from: false,
-    to: false,
+  const [valuesCurrency, setValuesCurrency] = useState(inputsCurrency);
+  const [formValues, setFormValues] = useState({
+    amount: inputsValidation[0].value,
+    recipientWallet: inputsValidation[1].value,
   });
-  // const [options, setOptions] = useState([]);
 
-  const toggleDropdown = (id) => {
-    setIsOpen((prevIsOpen) => ({
-      ...prevIsOpen,
-      [id]: !prevIsOpen[id],
+  const [formErrors, setFormErrors] = useState({
+    amount: "",
+    recipientWallet: "",
+  });
+
+  const [avaliable, setAvaliable] = useState(100);
+  const [fee, setFee] = useState(0.002);
+  const [total, setTotal] = useState(100);
+
+  useEffect(() => {
+    setTotal(formValues.amount - formValues.amount * fee);
+  }, [formValues.amount, fee]);
+
+  const handelGetPercent = (percent) => {
+    const selectedPercent = percents.find((item) => item === percent);
+    const amount = (selectedPercent * parseFloat(avaliable)) / 100;
+    setFormValues((prevFormValues) => ({
+      ...prevFormValues,
+      amount: amount,
     }));
   };
 
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    console.log(formValues);
+    setFormValues({ ...formValues, [name]: value });
+    console.log(value);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    const { amount, recipientWallet } = formValues;
+    const errors = {};
+
+    if (!amount) {
+      errors.amount = "Amount is required";
+    } else if (parseFloat(amount) < 0.00001) {
+      errors.amount = `Amount should be greater than or equal to 0.00001`;
+    } else if (parseFloat(amount) > avaliable) {
+      errors.amount = `Amount should not exceed ${avaliable}`;
+    }
+
+    if (!recipientWallet) {
+      errors.recipientWallet = "Recipient Wallet is required";
+    } else if (recipientWallet.length < 25) {
+      errors.recipientWallet = `Recipient Wallet is too short`;
+    } else if (recipientWallet.length > 36) {
+      errors.recipientWallet = `Recipient Wallet is too long`;
+    }
+    setFormErrors(errors);
+
+    if (Object.keys(errors).length === 0) {
+      console.log(recipientWallet);
+    }
+  };
+
   return (
-    <form className={styles.form}>
-      <div className={styles.headerForm}>
-        <span className={styles.title}>You send</span>
+    <form onSubmit={handleSubmit}>
+      <div className="headerForm">
+        <span className="title">You send</span>
         <img src="/images/logo-small.png" alt="Logo" />
       </div>
-
-      <div className={styles.inputBlock}>
-        <label className={styles.label}>Select source currency</label>
-        <input
-          className={styles.input}
-          type="text"
-          placeholder="Ethereum (ETH)"
-          // value={`${inputValue.name} (${inputValue.code})`}
-          style={{ textAlign: "right" }}
-        />
-        <DropDown
-          id="from"
-          options={currencies}
-          isOpen={isOpen.from}
-          // selectedValue={selectedValue}
-          toggleDropdown={() => toggleDropdown("from")}
-        />
-      </div>
-
-      <div className={styles.inputBlock}>
+      <SelectCurrency
+        values={valuesCurrency[0]}
+        setValuesCurrency={setValuesCurrency}
+      />
+      <div
+        className="inputBlock"
+        style={{
+          borderBottom: "1px solid var(--border)",
+          paddingBottom: "25px",
+        }}
+      >
         <div>
           <div className={styles.flex}>
-            <label className={styles.label}>Enter amount</label>
-            <span className={styles.label}>
-              Avaliable: <span className={styles.span}> 00</span>{" "}
+            <label htmlFor={inputsValidation[0].name} className="label">
+              {inputsValidation[0].label}
+            </label>
+            <span className="label">
+              Avaliable: <span className={styles.span}>{avaliable}</span>{" "}
             </span>
           </div>
         </div>
-        <input className={styles.input} type="text" value="50" />
-        <button className={styles.btnMax}>Max</button>
+        <input
+          id={inputsValidation[0].id}
+          name={inputsValidation[0].name}
+          className="input"
+          type={inputsValidation[0].type}
+          value={formValues.amount}
+          onChange={handleInputChange}
+        />
+        {formErrors.amount && (
+          <span className="error">{formErrors.amount}</span>
+        )}
+        <div
+          className={styles.btnMax}
+          onClick={() =>
+            setFormValues((prevFormValues) => ({
+              ...prevFormValues,
+              amount: avaliable,
+            }))
+          }
+        >
+          Max
+        </div>
         <ul className={styles.listPer}>
           {percents.map((per) => (
-            <li key={per} className={styles.itemPer}>
-              <span>{per}</span>
-              <span>%</span>
-            </li>
+            <Percents percent={per} onGetPercent={handelGetPercent} key={per} />
           ))}
         </ul>
       </div>
-      <span className={styles.title} style={{ marginBottom: "15px" }}>
+      <span
+        className="title"
+        style={{ display: "inline-block", marginBottom: "15px" }}
+      >
         You Get
       </span>
-      {/* <ToInput label="Select destination currency" /> */}
-      <div className={styles.inputBlock}>
-        <input
-          className={styles.input}
-          type="text"
-          placeholder="Ethereum (ETH)"
-          // value={`${inputValue.name} (${inputValue.code})`}
-          style={{ textAlign: "right" }}
-        />
-        <label className={styles.label}>Select destination currency</label>
 
-        <DropDown
-          id="to"
-          options={currencies}
-          isOpen={isOpen.to}
-          // selectedValue={selectedValue}
-          toggleDropdown={() => toggleDropdown("to")}
-        />
-      </div>
-      <div className={styles.inputBlock}>
+      <SelectCurrency
+        values={valuesCurrency[1]}
+        setValuesCurrency={setValuesCurrency}
+      />
+      <div className="inputBlock">
         <input
-          className={styles.input}
-          type="text"
-          placeholder="Enter wallet address"
+          id={inputsValidation[1].id}
+          name={inputsValidation[1].name}
+          className="input"
+          type={inputsValidation[1].type}
+          placeholder={inputsValidation[1].placeholder}
+          value={formValues.recipientWallet}
+          onChange={handleInputChange}
         />
-        <label className={styles.label}>Recipient Wallet Address</label>
+        {formErrors.recipientWallet && (
+          <span className="error">{formErrors.recipientWallet}</span>
+        )}
+
+        <label htmlFor={inputsValidation[1].name} className="label">
+          {inputsValidation[1].label}
+        </label>
       </div>
-      {/* <Total label="FEE" /> */}
-      <div className={styles.inputBlock}>
+
+      <div className="inputBlock">
         <div className={styles.flex}>
           <div className={styles.flex} style={{ gap: "17px" }}>
-            <label
-              className={styles.label}
-              style={{ textTransform: "uppercase" }}
-            >
+            <label className="label" style={{ textTransform: "uppercase" }}>
               Fee
             </label>
-            <button className={styles.btnInfo} type="button"></button>
+            <Tooltip />
           </div>
           <span className={styles.span}>
-            098 <span className={styles.span}> ETH</span>{" "}
+            {fee} <span className={styles.span}> ETH</span>{" "}
           </span>
         </div>
-
         <div
-          className={styles.input}
+          className="input"
           style={{ display: "flex", justifyContent: "space-between" }}
         >
-          <span>Total</span>
-          <span>100</span>
+          <span className="label">Total</span>
+          <span>{total}</span>
         </div>
       </div>
-      <input type="submit" className={styles.btn} value="Transfer now" />
+      <button className="btn" type="submit">
+        Transfer now
+      </button>
     </form>
   );
 }

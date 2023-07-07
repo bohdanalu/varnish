@@ -11,6 +11,7 @@ function Header() {
             <img className={styles.logo} src="/images/logo.png" alt="Logo" />
           </a>
           <a className={styles.link} href="#">
+            <img src="/images/icons/wallet.svg" alt="" />
             Connect wallet
           </a>
         </div>

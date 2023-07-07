@@ -1,3 +1,5 @@
+/* @import "../../../styles/variable.css";
+@import "../../../styles/common.css"; */
 .socialLinks {
   position: absolute;
   bottom: 55px;
@@ -21,8 +23,4 @@
 
 .socialItem:hover {
   opacity: 0.8;
-}
-
-.socialItem img {
-  width: 16px;
 }
