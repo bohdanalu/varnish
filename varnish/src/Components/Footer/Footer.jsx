@@ -8,6 +8,11 @@ function Footer() {
   return (
     <div className={styles.footer}>
       <PageContainer>
+        <img
+          style={{ width: "100%" }}
+          src="/images/icons/pseudo.png"
+          alt="Line"
+        />
         <div className={styles.wrapper}>
           <Nav />
           <Social />
